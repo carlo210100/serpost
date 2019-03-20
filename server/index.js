@@ -34,13 +34,13 @@ module.exports = async (req, res) => {
     })
 
     answer = { data: result.WS_ConsultarTrackingResult }
+    if (!answer.data) throw new Error('Tracking number not registered.')
   } catch (err) {
-    answer = {
-      error: {
-        code: err.code || 0,
-        message: err.message,
-      },
-    }
+    let message = null
+    if (!err.root) message = err.message
+    else message = err.root.Envelope.Body.Fault.faultstring.$value
+
+    answer = { error: { message } }
   }
 
   res.setHeader('content-type', 'application/json; charset=utf-8')
