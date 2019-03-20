@@ -11,6 +11,16 @@ module.exports = async (req, res) => {
     const { track } = parse(req.url, true).query
     if (!track) throw new Error('Missing tracking number.')
 
+    const weight = [8, 6, 4, 2, 3, 5, 9, 7]
+    const digits = track.substr(2, 8).split('')
+    let check = digits
+      .map((dg, i) => dg * weight[i])
+      .reduce((pre, acc) => pre + acc)
+    check = 11 - (check % 11)
+    if (check == 10) check = 0
+    if (check == 11) check = 5
+    if (check != track[10]) throw new Error('Invalid tracking number.')
+
     // TODO: Check order IS NOT changed
     if (!client) client = await createClientAsync(API_URL)
     const [result] = await client.WS_ConsultarTrackingAsync({
