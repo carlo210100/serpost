@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "name": "serpost",
+  "alias": ["serpost.zadbia.ga"],
+  "routes": [
+    { "src": "/", "dest": "/client" },
+    { "src": "/api", "dest": "/server" }
+  ],
+  "builds": [
+    { "src": "server/index.js", "use": "@now/node" },
+    { "src": "client/index.html", "use": "@now/html-minifier" }
+  ],
+  "env": {
+    "API_URL": "@spst-api-url",
+    "API_CODE": "@spst-api-code",
+    "API_TOKEN": "@spst-api-token"
+  }
+}
