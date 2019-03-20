@@ -4,8 +4,8 @@
   "github": { "silent": true },
   "alias": ["serpost.zadbia.ga"],
   "routes": [
-    { "src": "/", "dest": "/client" },
-    { "src": "/api", "dest": "/server" }
+    { "src": "/api", "dest": "/server" },
+    { "src": "/(.*)", "dest": "/client/$1" }
   ],
   "builds": [
     { "src": "server/index.js", "use": "@now/node" },
