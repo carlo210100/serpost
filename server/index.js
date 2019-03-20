@@ -4,16 +4,22 @@ const { createClientAsync } = require('soap')
 let client = null
 const { API_URL, API_CODE, API_TOKEN } = process.env
 
+const ERROR = {
+  UNKNOWN: 'El número de origen no tiene historial.',
+  INVALID: 'Dato inválido. Error en el formato del número de origen.',
+  MISSING: 'Dato obligatorio faltante. No se ingresó el número de origen.',
+}
+
 module.exports = async (req, res) => {
   let answer = null
 
   try {
     let { track } = parse(req.url, true).query
-    if (!track) throw new Error('Missing tracking number.')
+    if (!track) throw new Error(ERROR.MISSING)
 
     track = track.toUpperCase()
     if (!/^[CARVEL][A-Z]\d{9}[A-Z]{2}$/.test(track))
-      throw new Error('Invalid tracking number.')
+      throw new Error(ERROR.INVALID)
 
     const weight = [8, 6, 4, 2, 3, 5, 9, 7]
     const digits = track.substr(2, 8).split('')
@@ -23,7 +29,7 @@ module.exports = async (req, res) => {
     check = 11 - (check % 11)
     if (check == 10) check = 0
     if (check == 11) check = 5
-    if (check != track[10]) throw new Error('Invalid tracking number.')
+    if (check != track[10]) throw new Error(ERROR.INVALID)
 
     // TODO: Check order IS NOT changed
     if (!client) client = await createClientAsync(API_URL)
@@ -34,7 +40,7 @@ module.exports = async (req, res) => {
     })
 
     answer = { data: result.WS_ConsultarTrackingResult }
-    if (!answer.data) throw new Error('Tracking number not registered.')
+    if (!answer.data) throw new Error(ERROR.UNKNOWN)
   } catch (err) {
     let message = null
     if (!err.root) message = err.message
