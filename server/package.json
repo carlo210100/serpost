@@ -1,4 +1,6 @@
 {
   "extends": "..",
-  "dependencies": {}
+  "dependencies": {
+    "soap": "^0.26.0"
+  }
 }
