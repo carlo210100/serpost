@@ -1,6 +1,7 @@
 {
   "version": 2,
   "name": "serpost",
+  "github": { "silent": true },
   "alias": ["serpost.zadbia.ga"],
   "routes": [
     { "src": "/", "dest": "/client" },
