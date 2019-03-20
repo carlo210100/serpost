@@ -4,8 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Seguimiento Serpost (antiguo)</title>
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css"
+    />
+    <style>
+      html {
+        overflow-y: auto;
+      }
+    </style>
   </head>
   <body>
-    <p>EN CONSTRUCCIÓN</p>
+    <section class="section">
+      <div class="container has-text-centered">
+        <h1 class="title">Serpost</h1>
+        <h2 class="subtitle">Seguimiento (antiguo)</h2>
+        <form class="field has-addons has-addons-centered">
+          <div class="control">
+            <input
+              required
+              type="text"
+              class="input"
+              maxlength="13"
+              placeholder="Nùmero de seguimiento"
+              pattern="^[CARVEL][A-Z]\d{9}[A-Z]{2}$"
+            />
+          </div>
+          <div class="control">
+            <button class="button is-success">Buscar</button>
+          </div>
+        </form>
+      </div>
+    </section>
   </body>
 </html>
