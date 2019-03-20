@@ -9,6 +9,7 @@
   ],
   "builds": [
     { "src": "server/index.js", "use": "@now/node" },
+    { "src": "client/favicon.ico", "use": "@now/static" },
     { "src": "client/index.html", "use": "@now/html-minifier" }
   ],
   "env": {
