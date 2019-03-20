@@ -8,8 +8,12 @@ module.exports = async (req, res) => {
   let answer = null
 
   try {
-    const { track } = parse(req.url, true).query
+    let { track } = parse(req.url, true).query
     if (!track) throw new Error('Missing tracking number.')
+
+    track = track.toUpperCase()
+    if (!/^[CARVEL][A-Z]\d{9}[A-Z]{2}$/.test(track))
+      throw new Error('Invalid tracking number.')
 
     const weight = [8, 6, 4, 2, 3, 5, 9, 7]
     const digits = track.substr(2, 8).split('')
