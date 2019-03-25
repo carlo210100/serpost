@@ -13,7 +13,6 @@
     { "src": "client/index.html", "use": "@now/html-minifier" }
   ],
   "env": {
-    "API_URL": "@spst-api-url",
     "API_CODE": "@spst-api-code",
     "API_TOKEN": "@spst-api-token"
   }
