@@ -34,150 +34,137 @@
     </script>
   </head>
   <body>
-    <section class="section" id="main">
-      <div class="container has-text-centered">
-        <h1 class="title">Serpost</h1>
-        <h2 class="subtitle">Seguimiento (antiguo)</h2>
-        <form class="field has-addons has-addons-centered">
-          <div class="control">
-            <input
-              required
-              type="text"
-              maxlength="13"
-              class="input has-text-centered"
-              placeholder="Nùmero de seguimiento"
-              pattern="^[CARVEL][A-Z]\d{9}[A-Z]{2}$"
-            />
-          </div>
-          <div class="control">
-            <button class="button is-success">Buscar</button>
-          </div>
-        </form>
+    <section class="section has-text-centered">
+      <h1 class="title">Serpost</h1>
+      <h2 class="subtitle">{{ form ? 'Hacer' : 'Detalle' }} seguimiento</h2>
+
+      <div v-if="form" class="columns is-gapless">
+        <div class="column is-one-quarter"></div>
+        <div class="column is-half">
+          <article v-if="error" class="message is-danger">
+            <div class="message-body">{{ error.message }}</div>
+          </article>
+          <form
+            class="field has-addons has-addons-centered"
+            v-if="form"
+            @submit.prevent="lookup"
+          >
+            <div class="control">
+              <input
+                required
+                maxlength="13"
+                class="input has-text-centered"
+                placeholder="Número seguimiento"
+                pattern="^[A-Z]{2}\d{9}[A-Z]{2}$"
+                v-model="track"
+              />
+            </div>
+            <div class="control">
+              <button
+                class="button is-link"
+                :disabled="loading"
+                :class="{'is-loading': loading}"
+              >
+                BUSCAR
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </section>
-    <section class="section is-hidden" id="info">
-      <div class="container has-text-centered">
-        <h1 class="title">Serpost</h1>
-        <h2 class="subtitle">Detalle seguimiento (antiguo)</h2>
-        <div class="table-container">
+
+      <div v-else class="container">
+        <div class="table-container" v-if="model">
           <table class="table is-narrow is-bordered is-hoverable">
             <tbody>
               <tr>
                 <th rowspan="4">ENVÍO</th>
                 <th>NÚMERO</th>
-                <td data-prop="ENVIO"></td>
+                <td>{{ model.ENVIO }}</td>
               </tr>
               <tr>
                 <th>ORIGEN</th>
-                <td data-prop="OFICINAORIGEN"></td>
+                <td>{{ model.OFICINAORIGEN }}</td>
               </tr>
               <tr>
                 <th>DESTINO</th>
-                <td data-prop="OFICINADESTINO"></td>
+                <td>{{ model.OFICINADESTINO }}</td>
               </tr>
               <tr>
                 <th>ESTADO</th>
-                <td data-prop="ESTADO" data-defv="EN PROCESO"></td>
+                <td>{{ model.ESTADO || 'EN PROCESO' }}</td>
               </tr>
               <tr>
                 <th rowspan="4">ENTREGA</th>
                 <th>FECHA</th>
-                <td data-prop="FECHAENTREGA"></td>
+                <td>{{ model.FECHAENTREGA }}</td>
               </tr>
               <tr>
                 <th>DESTINATARIO</th>
-                <td data-prop="DESTINATARIO"></td>
+                <td>{{ model.DESTINATARIO || '-' }}</td>
               </tr>
               <tr>
                 <th>DOCUMENTO</th>
-                <td data-prop="DOCUMENTO"></td>
+                <td>{{ model.DOCUMENTO || '-' }}</td>
               </tr>
               <tr>
                 <th>FECHA ADUANA</th>
-                <td>--- TBD ---</td>
+                <td>-</td>
+              </tr>
+              <tr v-for="(item, i) in model.HISTORIAL">
+                <th v-if="!i" :rowspan="model.HISTORIAL.length">HISTORIAL</th>
+                <td>{{ item.FECHAHORA }}</td>
+                <td>{{ item.DESCRIPCION }}</td>
               </tr>
             </tbody>
-            <tfoot></tfoot>
           </table>
         </div>
-        <button class="button is-info" id="back">VOLVER</button>
+        <button class="button is-info" @click="cancel">VOLVER</button>
       </div>
     </section>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
     <script>
-      ;(function(document) {
-        function toggleLoad() {
-          var show = document.querySelector('button')
-          show.disabled = !show.disabled
-          show.classList.toggle('is-loading')
-        }
-        function togglePage() {
-          document.getElementById('main').classList.toggle('is-hidden')
-          document.getElementById('info').classList.toggle('is-hidden')
-        }
-        function feedTable(data) {
-          var tds = document.querySelectorAll('[data-prop]')
-          for (var i = 0, l = tds.length; i < l; i++) {
-            var ds = tds[i].dataset
-            tds[i].innerText = data[ds.prop] || ds.defv || '-'
-          }
-          var tfoot = document.querySelector('tfoot')
-          while (tfoot.firstChild) tfoot.removeChild(tfoot.firstChild)
-          if (data.ITEMS && data.ITEMS.ItemDetalle) {
-            var first = true
-            data.ITEMS.ItemDetalle.reverse().forEach(function(item) {
-              var tr = document.createElement('tr')
-              if (first) {
-                first = false
-                var th = document.createElement('th')
-                th.innerText = 'HISTORIAL'
-                th.rowSpan = data.ITEMS.ItemDetalle.length
-                tr.appendChild(th)
+      const app = new Vue({
+        el: 'section',
+        data: {
+          track: '',
+          form: true,
+          error: null,
+          model: null,
+          loading: false,
+        },
+        methods: {
+          lookup: function() {
+            var self = this
+            self.error = null
+            self.loading = true
+            var xhr = new XMLHttpRequest()
+            xhr.onload = function() {
+              var res = xhr.response
+              if (res.data) {
+                res.data.HISTORIAL = res.data.ITEMS.ItemDetalle.reverse()
+                self.model = res.data
+                self.form = false
+                self.track = ''
+              } else {
+                self.model = null
+                self.error = res.error
               }
-              var td = document.createElement('td')
-              td.innerText = item.FECHAHORA
-              tr.appendChild(td)
-              td = document.createElement('td')
-              td.innerText = item.DESCRIPCION
-              tr.appendChild(td)
-              tfoot.appendChild(tr)
-            })
-          }
-        }
-        function feedError(error) {
-          // TODO: Better error handling
-          alert('ERROR: ' + error.message)
-        }
-
-        var form = document.querySelector('form')
-        var code = document.querySelector('input')
-        form.onsubmit = function(e) {
-          e.preventDefault()
-          toggleLoad()
-
-          var xhr = new XMLHttpRequest()
-          xhr.onload = function() {
-            var res = xhr.response
-            if (res.data) {
-              code.value = ''
-              feedTable(res.data)
-              togglePage()
-            } else {
-              feedError(res.error)
+              self.loading = false
             }
-            toggleLoad()
-          }
-          xhr.onerror = xhr.onabort = function() {
-            feedError(new Error('Error desconocido, intente nuevamente.'))
-            toggleLoad()
-          }
-          // TODO: Validate tracking number
-          xhr.open('GET', '/api?track=' + code.value)
-          xhr.responseType = 'json'
-          xhr.send()
-        }
-
-        document.getElementById('back').onclick = togglePage
-      })(document)
+            xhr.onerror = xhr.onabort = function() {
+              self.error = new Error('Error desconocido, intente nuevamente.')
+              self.loading = false
+            }
+            xhr.open('GET', '/api?track=' + self.track)
+            xhr.responseType = 'json'
+            xhr.send()
+          },
+          cancel: function() {
+            this.form = true
+            this.model = null
+          },
+        },
+      })
     </script>
   </body>
 </html>
