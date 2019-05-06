@@ -57,6 +57,7 @@
                 placeholder="Número seguimiento"
                 pattern="^[A-Z]{2}\d{9}[A-Z]{2}$"
                 v-model="track"
+                ref="track"
               />
             </div>
             <div class="control">
@@ -163,6 +164,9 @@
             this.form = true
             this.model = null
           },
+        },
+        mounted: function() {
+          this.$refs.track.focus();
         },
       })
     </script>
